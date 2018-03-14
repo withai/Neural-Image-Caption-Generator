@@ -43,7 +43,8 @@ class Caption_Generator():
 
         self.current_epoch = 0
         self.current_step = 0
-        if self.resume is 1 or self.mode == 'test':
+        if self.resume is True or self.mode == 'test':
+            print("Loading previous checkpoint.")
             if os.path.isfile('model/save.npy'):
                 self.current_epoch, self.current_step = np.load(
                     "model/save.npy")
@@ -56,16 +57,18 @@ class Caption_Generator():
             self.vocab = np.load("Dataset/vocab.npy").tolist()
             self.wtoidx = np.load("Dataset/wordmap.npy").tolist()
             self.max_words = np.int(len(self.wtoidx))
+            print(self.max_words)
             self.idxtow = dict(zip(self.wtoidx.values(), self.wtoidx.keys()))
             self.model()
             self.image_features, self.IDs = self.build_decode_graph()
             self.load_image=config.load_image
             if not self.batch_decode:
-                self.io = build_prepro_graph(config.inception_path)
+                self.io = build_graph(config.inception_path)
                 self.sess = self.init_decode()
             return
 
         self.max_words = np.int(len(self.wtoidx))
+        print(self.max_words)
         self.idxtow = dict(zip(self.wtoidx.values(), self.wtoidx.keys()))
         self.model()
 
@@ -153,7 +156,7 @@ class Caption_Generator():
                 self.max_words,
                 'Bias_target', bias_init=self.bias_init)}
 
-        self.lstm_cell = tf.contrib.rnn.BasicLSTMCell(self.num_hidden)
+        self.lstm_cell = tf.contrib.rnn.BasicLSTMCell(self.num_hidden, reuse=tf.AUTO_REUSE)
 
         if self.dropout:
             self.lstm_cell = tf.contrib.rnn.DropoutWrapper(
@@ -236,7 +239,7 @@ class Caption_Generator():
                 predicted_next_idx = tf.cast(predicted_next_idx, tf.int32, name="word_"+str(i))
                 IDs.append(predicted_next_idx)
 
-        with open("model/Decoder/DecoderOutputs.txt", 'w') as f:
+        with open("model/Decoder/DecoderOutputs.txt", 'w+') as f:
             for name in IDs:
                 f.write(name.name.split(":0")[0] + "\n")
 
@@ -313,12 +316,14 @@ class Caption_Generator():
 
     def decode(self, path):
         features = get_features(self.sess, self.io, path, self.saveencoder)
+        print(features)
         caption_IDs = self.sess.run(
             self.IDs, feed_dict={
                 self.image_features: features})
         sentence = " ".join(self.IDs_to_Words(self.idxtow, caption_IDs))
         sentence = sentence.split("</S>")[0]
         if self.load_image:
+            print("loaded_image")
             plt.imshow(Image.open(path))
             plt.axis("off")
             plt.title(sentence, fontsize='10', loc='left')

@@ -71,7 +71,7 @@ if(config.mode == "train"):
     model.train(loss, inp_dict)
 
 elif config.mode == "test":
-    if os.path.exists(image_path):
+    if os.path.exists(FLAGS.image_path):
         model = Caption_Generator(config)
         model.decode(FLAGS.image_path)
     else:

@@ -6,7 +6,7 @@ class Config():
         self.dim_imgft = 1536
         self.embedding_size = 256
         self.num_hidden = 256
-        self.batch_size = 100
+        self.batch_size = 700
         self.num_timesteps = 22
         self.learning_rate = 0.002
         self.nb_epochs = 10000
@@ -20,6 +20,6 @@ class Config():
         self.resume = args["resume"]
         self.load_image = bool(args.get("load_image"))
         #self.data_is_coco = bool(args.get("data_is_coco"]))
-        self.inception_path = args.get("inception_path", "ConvNets/inception_v4.pb")
+        self.inception_path = args.get("inception_path", "Conv-Network/inception_v4.pb")
         self.saveencoder = bool(args.get("saveencoder"))
         self.savedecoder = bool(args.get("savedecoder"))

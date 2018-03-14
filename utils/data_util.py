@@ -145,6 +145,7 @@ def generate_captions(config,
     np.save("Dataset/train_data", list(zip(features, captions)))
     np.save("Dataset/wordmap", wtoidx)
     np.save("Dataset/vocab", vocab)
+    print(len(wtoidx))
 
     print("Preprocessing Complete")
     return get_data(required_files)
